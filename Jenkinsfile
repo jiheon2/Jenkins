@@ -43,11 +43,6 @@ pipeline {
         }
     }
     post {
-        always {
-            // 테스트 결과와 로그를 Jenkins UI에 표시
-            junit '**/target/surefire-reports/*.xml'
-            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-        }
         success {
             echo '빌드와 테스트가 성공적으로 끝났습니다. 이미지가 생성되었습니다. 이미지를 확인하세요.'
         }
