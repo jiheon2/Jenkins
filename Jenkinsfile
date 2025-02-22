@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    tools {
+        // 위에서 등록한 Maven 이름
+        maven 'Maven 3.9.9'
+    }
     environment {
             // 애플리케이션 이름 및 Docker 이미지 태그 정보
             APP_NAME = "Jenkins"
