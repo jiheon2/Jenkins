@@ -1,27 +1,28 @@
 pipeline {
-    agent {
-        kubernetes {
-            // 에이전트 Pod의 라벨 이름 지정
-            label 'dind-agent'
-            defaultContainer 'jnlp'
-            // YAML 형태로 Pod Template 정의
-            yaml """
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    role: jenkins-agent
-spec:
-  containers:
-  - name: jnlp
-    image: your-registry.example.com/jenkins-agent-dind:latest
-    imagePullPolicy: IfNotPresent
-    tty: true
-    command:
-    - cat
-"""
-        }
-    }
+       agent any
+//     agent {
+//         kubernetes {
+//             // 에이전트 Pod의 라벨 이름 지정
+//             label 'dind-agent'
+//             defaultContainer 'jnlp'
+//             // YAML 형태로 Pod Template 정의
+//             yaml """
+// apiVersion: v1
+// kind: Pod
+// metadata:
+//   labels:
+//     role: jenkins-agent
+// spec:
+//   containers:
+//   - name: jnlp
+//     image: your-registry.example.com/jenkins-agent-dind:latest
+//     imagePullPolicy: IfNotPresent
+//     tty: true
+//     command:
+//     - cat
+// """
+//         }
+//     }
     tools {
         // Global Tool Configuration에서 등록한 Maven 버전 사용
         maven 'Maven 3.9.9'
