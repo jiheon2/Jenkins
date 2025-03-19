@@ -1,5 +1,5 @@
 # 1단계: 빌드 단계
-FROM maven:3.8.6-openjdk-17-slim AS build
+FROM maven:3.8.6-openjdk-17 AS build
 
 # 작업 디렉터리 설정
 WORKDIR /app
