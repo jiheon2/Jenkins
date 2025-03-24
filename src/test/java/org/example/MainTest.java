@@ -1,83 +1,31 @@
 package org.example;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import static org.junit.jupiter.api.Assertions.*;
 
-class MainTest {
+import static org.junit.jupiter.api.Assertions.fail;
 
-    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
+import java.util.concurrent.*;
 
-    @BeforeEach
-    public void setUp() {
-        // System.out을 캡처하기 위해 리다이렉트
-        System.setOut(new PrintStream(outputStreamCaptor));
-    }
+public class MainTest {
 
-    @AfterEach
-    public void tearDown() {
-        // 테스트 후 원래의 System.out으로 복원
-        System.setOut(originalOut);
-    }
-
-    @Test
-    void testGetGreetingOutputAndReturn() {
+    @Test// 전체 테스트가 5초 이내에 종료되어야 합니다.
+    public void testGetGreetingInfiniteLoopWithFuture() throws InterruptedException {
         Main main = new Main();
-        String result = main.getGreeting();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<String> future = executor.submit(() -> main.getGreeting());
 
-        // 반환값 검증
-        assertEquals("finish", result, "getGreeting() 메소드는 \"finish\"를 반환해야 합니다.");
-
-        String output = outputStreamCaptor.toString();
-
-        // "Hello, Jenkins!"가 10번 출력되었는지 확인
-        assertEquals(10, countOccurrences(output, "Hello, Jenkins!"), "Hello, Jenkins!가 10번 출력되어야 합니다.");
-
-        // 카운트다운 숫자들이 10번씩 출력되었는지 확인
-        assertEquals(10, countOccurrences(output, "5"), "5가 10번 출력되어야 합니다.");
-        assertEquals(10, countOccurrences(output, "4"), "4가 10번 출력되어야 합니다.");
-        assertEquals(10, countOccurrences(output, "3"), "3이 10번 출력되어야 합니다.");
-        assertEquals(10, countOccurrences(output, "2"), "2가 10번 출력되어야 합니다.");
-        assertEquals(10, countOccurrences(output, "1"), "1이 10번 출력되어야 합니다.");
-
-        // "프로그램을 종료합니다."가 한 번 출력되었는지 확인
-        assertEquals(1, countOccurrences(output, "프로그램을 종료합니다."), "프로그램 종료 메시지가 한 번 출력되어야 합니다.");
-    }
-
-    @Test
-    void testMainMethodOutput() {
-        // outputStream 초기화
-        outputStreamCaptor.reset();
-        Main.main(new String[]{});
-
-        String output = outputStreamCaptor.toString();
-
-        // "Hello, Jenkins!"가 10번 출력되었는지 확인
-        assertEquals(10, countOccurrences(output, "Hello, Jenkins!"), "Hello, Jenkins!가 10번 출력되어야 합니다.");
-
-        // 카운트다운 숫자들이 10번씩 출력되었는지 확인
-        assertEquals(10, countOccurrences(output, "5"), "5가 10번 출력되어야 합니다.");
-        assertEquals(10, countOccurrences(output, "4"), "4가 10번 출력되어야 합니다.");
-        assertEquals(10, countOccurrences(output, "3"), "3이 10번 출력되어야 합니다.");
-        assertEquals(10, countOccurrences(output, "2"), "2가 10번 출력되어야 합니다.");
-        assertEquals(10, countOccurrences(output, "1"), "1이 10번 출력되어야 합니다.");
-
-        // "프로그램을 종료합니다."가 한 번 출력되었는지 확인
-        assertEquals(1, countOccurrences(output, "프로그램을 종료합니다."), "프로그램 종료 메시지가 한 번 출력되어야 합니다.");
-    }
-
-    // 문자열 내 특정 부분 문자열의 발생 횟수를 세는 헬퍼 메소드
-    private int countOccurrences(String str, String subStr) {
-        int count = 0;
-        int index = 0;
-        while ((index = str.indexOf(subStr, index)) != -1) {
-            count++;
-            index += subStr.length();
+        try {
+            // 3초 동안 결과가 없으면 TimeoutException 발생, 이는 무한 루프가 동작 중임을 의미합니다.
+            future.get(3, TimeUnit.SECONDS);
+            fail("getGreeting 메서드는 무한 루프를 실행해야 하므로, 결과가 반환되면 안됩니다.");
+        } catch (TimeoutException e) {
+            // 예상한 상황: 무한 루프이므로 타임아웃이 발생함.
+        } catch (ExecutionException e) {
+            fail("예상치 못한 예외 발생: " + e.getCause());
+        } finally {
+            // 테스트 종료 전에 작업을 취소하고, ExecutorService를 종료합니다.
+            future.cancel(true);
+            executor.shutdownNow();
         }
-        return count;
     }
 }
