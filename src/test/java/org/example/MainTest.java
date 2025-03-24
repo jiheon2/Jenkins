@@ -16,7 +16,7 @@ public class MainTest {
 
         try {
             // 3초 동안 결과가 없으면 TimeoutException 발생, 이는 무한 루프가 동작 중임을 의미합니다.
-            future.get(3, TimeUnit.SECONDS);
+            future.get( 1, TimeUnit.SECONDS);
             fail("getGreeting 메서드는 무한 루프를 실행해야 하므로, 결과가 반환되면 안됩니다.");
         } catch (TimeoutException e) {
             // 예상한 상황: 무한 루프이므로 타임아웃이 발생함.
